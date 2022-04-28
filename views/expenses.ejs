@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/css/expenses.css">
+    <link rel="stylesheet" href="/css/expense2.css">
+
+    <title>Document</title>
+</head>
+<body>
+    
+    <% var expense=0; %>
+        <% var investment=0; %>
+            <% var savings=0; %>
+                <% posts.forEach(function(post){ %>
+                    <% expense=expense + post.normal %>
+                        <% investment=investment + post.investment %>
+                            <% savings=savings + post.savings %>
+                                <% }); %>
+
+
+
+                                
+    <header>
+        <div class="navbarIncluding" style="margin: 0%; padding: 0%;">
+            <%- include ("partials/navbar") %>
+        </div>
+    </header>
+    
+<div style="align-items: center;">
+    <%- include ("chart") %>
+</div>
+
+
+
+
+                                    <section class="main">
+
+                                        <h2 style="text-align: center;">Expense Tracker</h2>
+                                        <div class="container">
+                                            <h4>Your SAVINGS</h4>
+                                            <h1 id="balance">&#8377;<%=savings%>
+                                            </h1>
+                                            <div class="inc-exp-container">
+                                                <div>
+                                                    <h4>INVESTMENT</h4>
+                                                    <p id="money-plus" class="money-plus">
+                                                        +&#8377;<%=investment%>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <h4>EXPENSE</h4>
+                                                    <p id="money-minus" class="money-minus">
+                                                        -&#8377;<%=expense%>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+
+
+                                            <h3>History</h3>
+                                            <% posts.forEach(function(post){ %>
+                                                <ul id="list" class="list">
+                                                    <li class="minus">
+                                                        Expense <span>-&#8377;<%=post.normal%></span>
+                                                    </li>
+                                                    <li class="plus">
+                                                        Investment <span>+&#8377;<%=post.investment%></span>
+                                                    </li>
+                                                </ul>
+                                                <% }); %>
+
+                                        </div>
+                                    </section>
+
+
+
+</body>
+</html>

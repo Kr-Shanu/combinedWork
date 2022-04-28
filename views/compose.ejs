@@ -1,0 +1,87 @@
+<%- include ("partials/header") %>
+
+    <link rel="stylesheet" href="/css/expenses.css">
+    <link rel="stylesheet" href="/css/compose.css">
+
+    <title>Compose Page</title>
+    </head>
+
+    <body>
+
+        <%- include ("partials/navbar") %>
+
+            <!-- End of navbar section -->
+
+            <div class="container my-4" style="padding-top: 5%;">
+                <h2 class="text-center" style="color: white; font-size:410%;">Compose Page</h2>
+
+                <form action="/compose" method="post">
+
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" class="form-control" name="blogTitle">
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Post</label>
+                        <textarea class="form-control" name="blogBody" rows="3" cols="30"></textarea>
+                    </div>
+
+                    <div style="color:whitesmoke; text-align: center; padding-top: 3%;">
+                        <h1>Expense Section</h1>
+                    </div>
+
+                    <br>
+
+
+                    <!-- experiment -->
+                    <div style="padding-left: 0%;">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="inputState">Expense Type</label>
+                            <select id="inputState" class="form-control">
+                                <option selected>Normal Expense</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputNormalExpense">Amount</label>
+                            <input type="number" name="normal" class="form-control" id="inputNormalExpense" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="inputState">Expense Type</label>
+                            <select id="inputState" class="form-control">
+                                <option selected>Investment</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputInvestment">Amount</label>
+                            <input type="number" name="investment" class="form-control" id="inputInvestment" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="inputState">Expense Type</label>
+                            <select id="inputState" class="form-control">
+                                <option selected>Savings</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputSavings">Amount</label>
+                            <input type="number" name="savings" class="form-control" id="inputSavings" value="0">
+                        </div>
+                    </div>
+                    </div>
+                    <!-- experiment ends here -->
+                    <br>
+                    <br>
+
+                    <button type="submit" class="btn btn-primary" name="button">Publish</button>
+
+                </form>
+
+            </div>
+
+            <%- include("partials/footer") %>

@@ -1,16 +1,18 @@
 const bodyParser = require("body-parser");
-const express =require("express");
-const ejs=require('ejs');
-const app=express();
-const path=require("path");
-const router=require("./database/connection");
-const dbconnection=require("./database/dbConnection");
+const express = require("express");
+const ejs = require("ejs");
+const app = express();
+const path = require("path");
+const router = require("./database/connection");
+const dbconnection = require("./database/dbConnection");
+const userDet = require("./database/userDet")
+const passport = require("passport");
+var use;
+var userToken;
 
 // setting up the folder public to fetch the static files.
 app.use(express.static("public"));
-
-app.set('view engine','ejs');
-
+app.set("view engine", "ejs");
 // setting up bodyparser to take input from the user.
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -25,17 +27,13 @@ app.use(express.urlencoded({ extended: false }));
 
 // fetching time
 const currentDay = require("./JsFiles/time");
-// requiring post schema to store post data
-const Post = require("./database/composeData")
 
+
+const { Passport } = require("passport/lib");
 
 app.get("/", async (req, res) => {
-
-  const user = await userDetModel.findOne({ _id: req.cookies.id });
   res.render("landing");
-  // console.log(user);
 });
-
 
 app.get("/registration", (req, res) => {
   res.render("registrationPage");
@@ -61,7 +59,7 @@ app.post("/registration", async (req, res) => {
       // console.log(saveUserDet);
       await saveUserDet.save();
       const token = await saveUserDet.generateAuthToken(); //generateAuthToken is user defined
-      res.cookie(`jwt register`, token, {
+      res.cookie(`jwt`, token, {
         // expires: new Date(Date.now() + 8 * 3600000),
         httpOnly: true,
       });
@@ -74,34 +72,21 @@ app.post("/registration", async (req, res) => {
   }
 });
 
-
-app.get("/login", (req, res) => {
-  res.render("loginPage");
-  // console.log(req.cookies.jwt);
-});
-
-
 app.post("/login", async (req, res) => {
   try {
     const userName = req.body.userName;
     const loginDetDb = await userDetModel.findOne({ userName: userName });
     const password = req.body.password;
     const pwComp = await bcrypt.compare(password, loginDetDb.password);
-    // console.log(loginDetDb);
     if (pwComp) {
       const token = await loginDetDb.generateAuthToken();
       res.cookie("jwt", token, {
-        // expires: new Date(Date.now() + 3000000),
         httpOnly: true,
       });
       res.cookie("id", loginDetDb._id, {
-        // expires: new Date(Date.now() + 3000000),
         httpOnly: true,
       });
-      // res.render("index");
       res.redirect("/activity");
-      // res.render("authenticate");
-      // console.log(token);
     } else {
       res.send("password or user id wrong");
     }
@@ -110,7 +95,6 @@ app.post("/login", async (req, res) => {
     console.log(err);
   }
 });
-
 
 app.get("/logout", auth, async (req, res) => {
   try {
@@ -129,79 +113,152 @@ app.get("/logout", auth, async (req, res) => {
   }
 });
 
-app.get("/activity", function (req, res) {
+app.get("/activity", auth, async (req, res) => {
 
-  Post.find({}, function (err, posts) 
-  {
-    res.render("activity", {posts: posts});
-  });
+  const person = await userDetModel.findOne({ _id: req.cookies.id });
+  const post = person.post;
+  // console.log(post);
 
-});
-
-app.get("/expenses", function (req, res) {
-
-  Post.find({}, function (err, posts) 
-  {
-    res.render("expenses", {posts: posts});
-  });
+  res.render("activity", { posts: post });
 
 });
 
+app.get("/expenses", auth, async (req, res) => {
 
-app.get("/chart", function (req, res) {
+  const person = await userDetModel.findOne({ _id: req.cookies.id });
+  const post = person.post;
 
-  Post.find({}, function (err, posts) 
-  {
-    res.render("chart", {posts: posts});
-  });
-
+  res.render("expenses", { posts: post });
 });
 
+app.get("/chart", auth, function (req, res) {
+  Post.find({}, function (err, posts) {
+    res.render("chart", { posts: posts });
+  });
+});
 
 app.get("/compose", auth, (req, res) => {
   res.render("compose");
 });
 
 // Will be using it to store the information from the compose page.
-app.post("/compose", function (req, res) {
+app.post("/compose", auth, async (req, res) => {
 
-// taking all the details from the user into a const post
-const post = new Post({
-    title:req.body.blogTitle, 
-    content:req.body.blogBody,
-    normal:req.body.normal,
-    investment:req.body.investment,
-    savings:req.body.savings,
+  const person = await userDetModel.findOne({ _id: req.cookies.id });
+  const id = person._id;
+  // console.log(id);
+
+  person.post = person.post.concat({
+    title: req.body.blogTitle,
+    content: req.body.blogBody,
+    normal: req.body.normal,
+    investment: req.body.investment,
+    savings: req.body.savings,
     date: currentDay.toString()
-});
+  });
 
-// console.log(post);
-
-  // saved the post to the collections 
-  post.save(function(err){
-    if(!err){
+  // // saved the post to the collections
+  await person.save(function (err) {
+    if (!err) {
       res.redirect("/activity");
     }
   });
-
 });
 
 
-app.get("/posts/:postId", function (req, res) {
+app.get("/posts/:postId", auth, function (req, res) {
   const requestedPostId = req.params.postId;
-
-  Post.findOne({_id: requestedPostId}, function(err, post){
-    if(!err)
-    {
+  Post.findOne({ _id: requestedPostId }, function (err, post) {
+    if (!err) {
       res.render("blogs", { postTitle: post.title, postContent: post.content });
     }
   });
+});
 
+app.get("/login", (req, res) => {
+  res.render("loginPage");
 });
 
 
 
+
+// **************Auth by Google***************
+// **************Auth by Google***************
+// **************Auth by Google***************
+// **************Auth by Google***************
+
+
+
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+const res = require("express/lib/response");
+const { redirect } = require("express/lib/response");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+try {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.client_ID,
+        clientSecret: process.env.client_sec,
+        callbackURL: "/google",
+      },
+      async (accestoken, refreshtoken, profile, done) => {
+        const userId = profile.emails[0].value;
+
+        const loginDetDb = await userDetModel.findOne({
+          userName: userId,
+        });
+        console.log(loginDetDb);
+        if (loginDetDb) {
+          userToken = await loginDetDb.generateAuthToken();
+          console.log("already a user");
+          done(null, loginDetDb);
+        } else {
+          const saveGUserDet = new userDetModel({
+            firstName: profile.name.givenName,
+            googleId: profile.id,
+            lastName: profile.name.familyName,
+            userName: profile.emails[0].value,
+          });
+          await saveGUserDet.save();
+          userToken = await saveGUserDet.generateAuthToken();
+          console.log("new user");
+          done(null, saveGUserDet);
+        }
+      }
+    )
+  );
+} catch (err) {
+  console.log("caught the error manually this is conosle.log");
+  console.log(err);
+}
+
+passport.serializeUser((user, done) => {
+  use = user;
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  userDetModel.findById(id).then((user) => {
+    done(null, user);
+  });
+});
+
+app.get("/google", passport.authenticate("google"), (req, res) => {
+  res.cookie(`jwt`, userToken, {
+    httpOnly: true,
+  });
+  res.cookie("id", use._id, {
+    httpOnly: true,
+  });
+  res.redirect("/login");
+});
+
 // listening the site on port 3000
 app.listen(process.env.PORT || 3000, function () {
-  console.log("Server started on port 3000 on "+ currentDay);
+  console.log("Server started on port 3000 on " + currentDay);
 });

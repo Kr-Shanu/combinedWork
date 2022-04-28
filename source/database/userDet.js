@@ -12,6 +12,15 @@ const userDetSchema = new mongoose.Schema({
     zip: Number,
     password: String,
     cnfmPassword: String,
+    googelId: String,
+    post: [{
+        title: String,
+        content: String,
+        normal: Number,
+        investment: Number,
+        savings: Number,
+        date: String
+    }],
     tokens: [{
         token: {
             type: String,
